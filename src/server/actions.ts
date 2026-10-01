@@ -1,10 +1,9 @@
 'use server';
 
-import { parseTaskWithAI } from '@/lib/ai/parseTask';
-import { prisma } from '@/lib/db';
-import { parseTags } from '@/lib/utils';
-import { RawTaskFromDB, Task } from '@/types/task';
 import { revalidatePath } from 'next/cache';
+import { prisma } from '@/lib/db';
+import { parseTaskWithAI } from '@/lib/ai/parseTask';
+import { Task } from '@/types/task';
 import { z } from 'zod';
 
 const createTaskSchema = z.object({
@@ -14,19 +13,29 @@ const createTaskSchema = z.object({
   tags: z.array(z.string()).optional().default([]),
 });
 
-function mapDBTaskToTask(dbTask: RawTaskFromDB): Task {
+// Postgres returns tags as native string[] — no JSON parsing needed
+function mapDBTaskToTask(dbTask: {
+  id: string;
+  title: string;
+  dueDate: Date | null;
+  priority: number;
+  tags: string[];
+  done: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}): Task {
   return {
     ...dbTask,
-    tags: parseTags(dbTask.tags),
+    tags: Array.isArray(dbTask.tags) ? dbTask.tags : [],
   };
 }
 
 export async function getTasksAction(): Promise<Task[]> {
   try {
-    const rawTasks = await prisma.task.findMany({
+    const tasks = await prisma.task.findMany({
       orderBy: [{ done: 'asc' }, { priority: 'asc' }, { dueDate: 'asc' }, { createdAt: 'desc' }],
     });
-    return rawTasks.map(mapDBTaskToTask);
+    return tasks.map(mapDBTaskToTask);
   } catch (error) {
     console.error('Failed to fetch tasks:', error);
     return [];
@@ -45,18 +54,18 @@ export async function createTaskAction(input: {
 }) {
   const validated = createTaskSchema.parse(input);
 
-  const newDbTask = await prisma.task.create({
+  const newTask = await prisma.task.create({
     data: {
       title: validated.title,
       dueDate: validated.dueDate ? new Date(validated.dueDate) : null,
       priority: validated.priority,
-      tags: JSON.stringify(validated.tags),
+      tags: validated.tags,
       done: false,
     },
   });
 
   revalidatePath('/');
-  return mapDBTaskToTask(newDbTask);
+  return mapDBTaskToTask(newTask);
 }
 
 export async function toggleTaskAction(id: string, done: boolean) {
@@ -98,7 +107,7 @@ export async function updateTaskAction(
   if (data.title !== undefined) updateData.title = data.title;
   if (data.dueDate !== undefined) updateData.dueDate = data.dueDate ? new Date(data.dueDate) : null;
   if (data.priority !== undefined) updateData.priority = data.priority;
-  if (data.tags !== undefined) updateData.tags = JSON.stringify(data.tags);
+  if (data.tags !== undefined) updateData.tags = data.tags;
   if (data.done !== undefined) updateData.done = data.done;
 
   const updated = await prisma.task.update({

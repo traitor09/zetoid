@@ -1,17 +1,8 @@
-import { type ClassValue, clsx } from 'clsx';
+import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
-}
-
-export function parseTags(tagsJson: string): string[] {
-  try {
-    const parsed = JSON.parse(tagsJson);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
 }
 
 export function formatDueDate(date: Date | string | null): string {
@@ -55,7 +46,6 @@ export function getPriorityBadgeProps(priority: number): {
           'text-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/50',
         badgeClass: 'bg-emerald-500',
       };
-    case 3:
     default:
       return {
         label: 'Medium',

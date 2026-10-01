@@ -8,12 +8,12 @@ generator client {
 }
 
 model Task {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   title     String
   dueDate   DateTime?
-  priority  Int      @default(3)   // 1=high, 3=medium, 5=low
-  tags      String   @default("[]") // Serialized JSON array of tags for SQLite compatibility
-  done      Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  priority  Int       @default(3)   // 1=high, 3=medium, 5=low
+  tags      String[]  @default([])
+  done      Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
