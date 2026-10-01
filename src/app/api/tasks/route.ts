@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { parseTags } from '@/lib/utils';
 import { z } from 'zod';
 
 const createTaskBodySchema = z.object({
@@ -11,10 +12,11 @@ const createTaskBodySchema = z.object({
 
 export async function GET() {
   try {
-    const tasks = await prisma.task.findMany({
+    const rawTasks = await prisma.task.findMany({
       orderBy: [{ done: 'asc' }, { priority: 'asc' }, { createdAt: 'desc' }],
     });
 
+    const tasks = rawTasks.map((t) => ({ ...t, tags: parseTags(t.tags) }));
     return NextResponse.json({ tasks });
   } catch (error) {
     console.error('API /api/tasks GET error:', error);
@@ -32,12 +34,12 @@ export async function POST(req: Request) {
         title: validated.title,
         dueDate: validated.dueDate ? new Date(validated.dueDate) : null,
         priority: validated.priority,
-        tags: validated.tags,
+        tags: JSON.stringify(validated.tags),
         done: false,
       },
     });
 
-    return NextResponse.json({ task: created });
+    return NextResponse.json({ task: { ...created, tags: parseTags(created.tags) } });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.errors }, { status: 400 });

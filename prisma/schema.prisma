@@ -12,7 +12,7 @@ model Task {
   title     String
   dueDate   DateTime?
   priority  Int       @default(3)   // 1=high, 3=medium, 5=low
-  tags      String[]  @default([])
+  tags      String   @default("[]")
   done      Boolean   @default(false)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

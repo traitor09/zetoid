@@ -1,21 +1,19 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { parseTags } from '@/lib/utils';
 import { summarizeDailyTasks } from '@/lib/ai/summarize';
 
 export async function GET() {
   try {
-    const tasks = await prisma.task.findMany({
+    const rawTasks = await prisma.task.findMany({
       take: 25,
       orderBy: [{ done: 'asc' }, { priority: 'asc' }, { createdAt: 'desc' }],
     });
 
-    const { stream, fallbackText } = await summarizeDailyTasks(
-      tasks.map((t) => ({ ...t, tags: Array.isArray(t.tags) ? t.tags : [] })),
-    );
+    const tasks = rawTasks.map((t) => ({ ...t, tags: parseTags(t.tags) }));
+    const { stream, fallbackText } = await summarizeDailyTasks(tasks);
 
-    if (stream) {
-      return stream.toDataStreamResponse();
-    }
+    if (stream) return stream.toDataStreamResponse();
 
     return new Response(fallbackText || 'No tasks summary available.', {
       headers: { 'Content-Type': 'text/plain; charset=utf-8' },
@@ -28,18 +26,15 @@ export async function GET() {
 
 export async function POST() {
   try {
-    const tasks = await prisma.task.findMany({
+    const rawTasks = await prisma.task.findMany({
       take: 30,
       orderBy: [{ done: 'asc' }, { priority: 'asc' }],
     });
 
-    const { stream, fallbackText } = await summarizeDailyTasks(
-      tasks.map((t) => ({ ...t, tags: Array.isArray(t.tags) ? t.tags : [] })),
-    );
+    const tasks = rawTasks.map((t) => ({ ...t, tags: parseTags(t.tags) }));
+    const { stream, fallbackText } = await summarizeDailyTasks(tasks);
 
-    if (stream) {
-      return stream.toDataStreamResponse();
-    }
+    if (stream) return stream.toDataStreamResponse();
 
     return new Response(fallbackText || 'Daily digest generated successfully.', {
       headers: { 'Content-Type': 'text/plain; charset=utf-8' },

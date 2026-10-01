@@ -9,6 +9,17 @@ export interface Task {
   updatedAt: Date;
 }
 
+export interface RawTaskFromDB {
+  id: string;
+  title: string;
+  dueDate: Date | null;
+  priority: number;
+  tags: string; // JSON string in DB
+  done: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface ParsedTask {
   title: string;
   dueDate: string | null;

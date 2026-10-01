@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/db';
 import { parseTaskWithAI } from '@/lib/ai/parseTask';
 import { Task } from '@/types/task';
+import { parseTags } from '@/lib/utils';
 import { z } from 'zod';
 
 const createTaskSchema = z.object({
@@ -13,27 +14,31 @@ const createTaskSchema = z.object({
   tags: z.array(z.string()).optional().default([]),
 });
 
-// Postgres returns tags as native string[] — no JSON parsing needed
 function mapDBTaskToTask(dbTask: {
   id: string;
   title: string;
   dueDate: Date | null;
   priority: number;
-  tags: string[];
+  tags: string;
   done: boolean;
   createdAt: Date;
   updatedAt: Date;
 }): Task {
   return {
     ...dbTask,
-    tags: Array.isArray(dbTask.tags) ? dbTask.tags : [],
+    tags: parseTags(dbTask.tags),
   };
 }
 
 export async function getTasksAction(): Promise<Task[]> {
   try {
     const tasks = await prisma.task.findMany({
-      orderBy: [{ done: 'asc' }, { priority: 'asc' }, { dueDate: 'asc' }, { createdAt: 'desc' }],
+      orderBy: [
+        { done: 'asc' },
+        { priority: 'asc' },
+        { dueDate: 'asc' },
+        { createdAt: 'desc' },
+      ],
     });
     return tasks.map(mapDBTaskToTask);
   } catch (error) {
@@ -59,7 +64,7 @@ export async function createTaskAction(input: {
       title: validated.title,
       dueDate: validated.dueDate ? new Date(validated.dueDate) : null,
       priority: validated.priority,
-      tags: validated.tags,
+      tags: JSON.stringify(validated.tags),
       done: false,
     },
   });
@@ -83,9 +88,7 @@ export async function toggleTaskAction(id: string, done: boolean) {
 export async function deleteTaskAction(id: string) {
   if (!id) throw new Error('Task ID is required');
 
-  await prisma.task.delete({
-    where: { id },
-  });
+  await prisma.task.delete({ where: { id } });
 
   revalidatePath('/');
   return { success: true, id };
@@ -99,15 +102,16 @@ export async function updateTaskAction(
     priority?: number;
     tags?: string[];
     done?: boolean;
-  },
+  }
 ) {
   if (!id) throw new Error('Task ID is required');
 
   const updateData: Record<string, unknown> = {};
   if (data.title !== undefined) updateData.title = data.title;
-  if (data.dueDate !== undefined) updateData.dueDate = data.dueDate ? new Date(data.dueDate) : null;
+  if (data.dueDate !== undefined)
+    updateData.dueDate = data.dueDate ? new Date(data.dueDate) : null;
   if (data.priority !== undefined) updateData.priority = data.priority;
-  if (data.tags !== undefined) updateData.tags = data.tags;
+  if (data.tags !== undefined) updateData.tags = JSON.stringify(data.tags);
   if (data.done !== undefined) updateData.done = data.done;
 
   const updated = await prisma.task.update({
