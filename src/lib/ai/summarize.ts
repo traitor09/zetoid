@@ -15,8 +15,8 @@ export async function summarizeDailyTasks(tasks: Task[]) {
 
   const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
   if (!apiKey || apiKey.trim() === '') {
-    // Return mock stream fallback if API key is absent
-    const mockText = `Good day! You have ${pendingTasks.length} pending task(s) and completed ${completedToday.length} task(s). Focus on your highest priority items first!`;
+    // Return mock fallback if API key is absent
+    const mockText = `You have ${pendingTasks.length} pending task(s) and ${completedToday.length} completed. Stay focused on your top priority items today!`;
     return {
       stream: null,
       fallbackText: mockText,
@@ -24,17 +24,15 @@ export async function summarizeDailyTasks(tasks: Task[]) {
   }
 
   const prompt = `Here is the user's current task list:
-Pending Tasks (${pendingTasks.length}):
-${JSON.stringify(taskSummary, null, 2)}
+Pending (${pendingTasks.length}): ${JSON.stringify(taskSummary)}
+Completed recently: ${completedToday.length}
 
-Completed Tasks recently (${completedToday.length}).
-
-Please generate a brief (2-3 sentences), upbeat, action-oriented daily briefing. Highlight high-priority items if any exist. Keep it encouraging and bulleted.`;
+Write a short, crisp daily digest for the user in at most 2 sentences. Do NOT use bullet points, list items, or line breaks. Highlight the single most important task to focus on today. Keep it under 180 characters.`;
 
   const result = streamText({
     model,
     system:
-      'You are Zetoid AI companion, an encouraging productivity assistant. Keep daily digests concise, clear, and inspiring.',
+      'You are Zetoid AI assistant. Provide short, single-paragraph daily digests (maximum 2 short sentences). Never use bullet points, markdown formatting, or line breaks.',
     prompt,
   });
 

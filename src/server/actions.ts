@@ -33,12 +33,7 @@ function mapDBTaskToTask(dbTask: {
 export async function getTasksAction(): Promise<Task[]> {
   try {
     const tasks = await prisma.task.findMany({
-      orderBy: [
-        { done: 'asc' },
-        { priority: 'asc' },
-        { dueDate: 'asc' },
-        { createdAt: 'desc' },
-      ],
+      orderBy: [{ done: 'asc' }, { priority: 'asc' }, { dueDate: 'asc' }, { createdAt: 'desc' }],
     });
     return tasks.map(mapDBTaskToTask);
   } catch (error) {
@@ -102,14 +97,13 @@ export async function updateTaskAction(
     priority?: number;
     tags?: string[];
     done?: boolean;
-  }
+  },
 ) {
   if (!id) throw new Error('Task ID is required');
 
   const updateData: Record<string, unknown> = {};
   if (data.title !== undefined) updateData.title = data.title;
-  if (data.dueDate !== undefined)
-    updateData.dueDate = data.dueDate ? new Date(data.dueDate) : null;
+  if (data.dueDate !== undefined) updateData.dueDate = data.dueDate ? new Date(data.dueDate) : null;
   if (data.priority !== undefined) updateData.priority = data.priority;
   if (data.tags !== undefined) updateData.tags = JSON.stringify(data.tags);
   if (data.done !== undefined) updateData.done = data.done;

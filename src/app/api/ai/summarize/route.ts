@@ -13,7 +13,7 @@ export async function GET() {
     const tasks = rawTasks.map((t) => ({ ...t, tags: parseTags(t.tags) }));
     const { stream, fallbackText } = await summarizeDailyTasks(tasks);
 
-    if (stream) return stream.toDataStreamResponse();
+    if (stream) return stream.toTextStreamResponse();
 
     return new Response(fallbackText || 'No tasks summary available.', {
       headers: { 'Content-Type': 'text/plain; charset=utf-8' },
@@ -34,7 +34,7 @@ export async function POST() {
     const tasks = rawTasks.map((t) => ({ ...t, tags: parseTags(t.tags) }));
     const { stream, fallbackText } = await summarizeDailyTasks(tasks);
 
-    if (stream) return stream.toDataStreamResponse();
+    if (stream) return stream.toTextStreamResponse();
 
     return new Response(fallbackText || 'Daily digest generated successfully.', {
       headers: { 'Content-Type': 'text/plain; charset=utf-8' },
