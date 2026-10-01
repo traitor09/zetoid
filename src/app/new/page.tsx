@@ -12,10 +12,10 @@ export default function NewTaskPage() {
   return (
     <div className="w-full py-4 space-y-6">
       <div className="flex items-center justify-between">
-        <Link href="/">
+        <Link href="/app">
           <Button variant="ghost" size="sm" className="gap-2 text-slate-400 hover:text-white">
             <ArrowLeft className="h-4 w-4" />
-            Back to Tasks
+            Back to Dashboard
           </Button>
         </Link>
       </div>
@@ -34,7 +34,7 @@ export default function NewTaskPage() {
           </div>
         </div>
 
-        <AddTask autoFocus onSuccess={() => router.push('/')} />
+        <AddTask autoFocus onSuccess={() => router.push('/app')} />
 
         <div className="mt-8 pt-6 border-t border-emerald-950/40">
           <h3 className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-3">

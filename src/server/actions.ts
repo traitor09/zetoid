@@ -65,6 +65,7 @@ export async function createTaskAction(input: {
   });
 
   revalidatePath('/');
+  revalidatePath('/app');
   return mapDBTaskToTask(newTask);
 }
 
@@ -77,6 +78,7 @@ export async function toggleTaskAction(id: string, done: boolean) {
   });
 
   revalidatePath('/');
+  revalidatePath('/app');
   return mapDBTaskToTask(updated);
 }
 
@@ -86,6 +88,7 @@ export async function deleteTaskAction(id: string) {
   await prisma.task.delete({ where: { id } });
 
   revalidatePath('/');
+  revalidatePath('/app');
   return { success: true, id };
 }
 
@@ -114,5 +117,6 @@ export async function updateTaskAction(
   });
 
   revalidatePath('/');
+  revalidatePath('/app');
   return mapDBTaskToTask(updated);
 }

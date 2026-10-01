@@ -1,11 +1,15 @@
 'use client';
 
-import { Plus, Sparkles } from 'lucide-react';
+import { ArrowRight, Plus, Sparkles } from 'lucide-react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import React from 'react';
 import { Button } from './ui/Button';
 
 export const Header: React.FC = () => {
+  const pathname = usePathname();
+  const isLanding = pathname === '/';
+
   return (
     <header className="sticky top-0 z-40 w-full glass-panel border-b border-emerald-900/30 mb-6">
       <div className="w-full px-4 sm:px-8 lg:px-12 h-16 flex items-center justify-between">
@@ -31,18 +35,38 @@ export const Header: React.FC = () => {
 
         {/* Quick Nav Actions */}
         <div className="flex items-center gap-3">
-          <Link href="/new">
-            <Button variant="secondary" size="sm" className="hidden sm:flex">
-              <Sparkles className="h-4 w-4 text-emerald-300/80" />
-              NLP Smart Add
-            </Button>
-          </Link>
-          <Link href="/new">
-            <Button variant="primary" size="sm">
-              <Plus className="h-4 w-4" />
-              <span>Add Task</span>
-            </Button>
-          </Link>
+          {isLanding ? (
+            <Link href="/app">
+              <Button variant="primary" size="sm" className="gap-2">
+                <span>Launch App</span>
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+          ) : (
+            <>
+              <Link href="/">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="hidden sm:flex text-slate-400 hover:text-white"
+                >
+                  Landing
+                </Button>
+              </Link>
+              <Link href="/new">
+                <Button variant="secondary" size="sm" className="hidden sm:flex">
+                  <Sparkles className="h-4 w-4 text-emerald-300/80" />
+                  NLP Smart Add
+                </Button>
+              </Link>
+              <Link href="/new">
+                <Button variant="primary" size="sm">
+                  <Plus className="h-4 w-4" />
+                  <span>Add Task</span>
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </header>
