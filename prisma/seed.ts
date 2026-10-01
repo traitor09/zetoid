@@ -12,35 +12,35 @@ async function main() {
     {
       title: 'Review project architecture and AI pipeline setup',
       priority: 1,
-      tags: ['dev', 'architecture'],
+      tags: JSON.stringify(['dev', 'architecture']),
       dueDate: new Date(Date.now() + 86400000), // Tomorrow
       done: false,
     },
     {
       title: 'Call team sync about natural language task feature',
       priority: 1,
-      tags: ['meeting', 'urgent'],
+      tags: JSON.stringify(['meeting', 'urgent']),
       dueDate: new Date(), // Today
       done: false,
     },
     {
       title: 'Buy groceries for the week (fruits, oats, coffee)',
       priority: 3,
-      tags: ['personal', 'shopping'],
+      tags: JSON.stringify(['personal', 'shopping']),
       dueDate: new Date(Date.now() + 172800000), // In 2 days
       done: false,
     },
     {
       title: 'Read Next.js 15 Server Actions best practices',
       priority: 3,
-      tags: ['learning'],
+      tags: JSON.stringify(['learning']),
       dueDate: null,
       done: true,
     },
     {
       title: 'Schedule dentist checkup for next month',
       priority: 5,
-      tags: ['health'],
+      tags: JSON.stringify(['health']),
       dueDate: null,
       done: false,
     },
